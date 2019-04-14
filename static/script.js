@@ -1,6 +1,19 @@
 var source = new EventSource('/stream');
 var sensors = new Map();
 
+function tYRangeFunction(range) {
+  var min = range.min - 2.5;
+  var max = range.max + 2.5;
+  return {min: min, max: max};
+}
+
+function pYRangeFunction(range) {
+  var min = range.min - 10;
+  var max = range.max + 10;
+  return {min: min, max: max};
+}
+
+
 source.onmessage = function (event) {
     sensor_data = JSON.parse(event.data);
     console.log(sensor_data);
@@ -46,8 +59,8 @@ source.onmessage = function (event) {
 
         var ts_t = new TimeSeries();
         var ts_p = new TimeSeries();
-        var chart_t = new SmoothieChart({millisPerPixel: 150, grid: {millisPerLine: 10000}});
-        var chart_p = new SmoothieChart({millisPerPixel: 150, grid: {millisPerLine: 10000}});
+        var chart_t = new SmoothieChart({yRangeFunction:tYRangeFunction, tooltip:true, millisPerPixel: 150, grid: {millisPerLine: 10000}});
+        var chart_p = new SmoothieChart({yRangeFunction:pYRangeFunction, tooltip:true, millisPerPixel: 150, grid: {millisPerLine: 10000}});
 
         chart_t.addTimeSeries(ts_t, {
             strokeStyle: 'rgba(0, 255, 0, 1)',
@@ -60,8 +73,8 @@ source.onmessage = function (event) {
             lineWidth: 2
         });
 
-        chart_t.streamTo(document.getElementById("pressure_" + sensor_data.sensor_id), 500);
-        chart_p.streamTo(document.getElementById("temp_" + sensor_data.sensor_id), 500);
+        chart_p.streamTo(document.getElementById("pressure_" + sensor_data.sensor_id), 500);
+        chart_t.streamTo(document.getElementById("temp_" + sensor_data.sensor_id), 500);
 
         sensors.set(sensor_data.sensor_id, {t: ts_t, p: ts_p, c_t: chart_t, c_p: chart_p});
     }
